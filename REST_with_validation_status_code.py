@@ -5,7 +5,11 @@ from incoming import datatypes, PayloadValidator, validators
 import datetime as dt
 from datetime import datetime
 
-# VALIDATION
+
+base = "https://restful-booker.herokuapp.com"
+
+
+# Payload Validation
 class PersonValidator(PayloadValidator):
 
     username = datatypes.String(error='username must be a string', required=False)
@@ -13,63 +17,51 @@ class PersonValidator(PayloadValidator):
     lastname = datatypes.String(error='lastname must be a string', required=False)
     totalprice = datatypes.Integer(error='totalprice must be an integer', required=False)
     depositpaid = datatypes.Function('deposit_validation', error=('depositpaid can be true or false'), required=False)
+    bookingdates = PayloadValidator({
+        "bookingdates": {
+            "checkin": validators.All(
+                validators.Required(),
+                validators.String(),
+                validators.Match(r'^\d{4}-\d{2}-\d{2}$')
+            ),
+            "checkout": validators.All(
+                validators.Required(),
+                validators.String(),
+                validators.Match(r'^\d{4}-\d{2}-\d{2}$')
+            )
+        }
+    })
 
-    def deposit_validation(self, val, **kwargs):
-        val = val.lower()
-        if val == 'true' or val == 'false':
-            return True
-        return False
-        
 validator = PersonValidator()
 
-# BOOKING CODE VALIDATION
-bookingdate_validator = PayloadValidator({
-    "bookingdates": {
-        "checkin": validators.All(
-            validators.Required(),
-            validators.String(),
-            validators.Match(r'^\d{4}-\d{2}-\d{2}$')
-        ),
-        "checkout": validators.All(
-            validators.Required(),
-            validators.String(),
-            validators.Match(r'^\d{4}-\d{2}-\d{2}$')
-        )
-    }
-})
 
-# Validate the payload
-validation_result = bookingdate_validator.validate(bookingdates)
+def handle_response(response):
+    if response.status_code == 200:
+        return response
+    elif response.status_code == 404:
+        print("404 Error: Resource not found")
+    elif response.status_code == 400:
+        print("400 Error: Bad request")
+    elif response.status_code == 401:
+        print("401 Error: Unauthorized")
+    elif response.status_code == 403:
+        print("403 Error: Forbidden")
+    elif response.status_code == 500:
+        print("500 Error: Internal Server Error")
+    else:
+        print("Error:", response.status_code)
 
-# Check validation result
-if validation_result.is_valid():
-    print("Payload is valid!")
-else:
-    print("Validation errors:")
-    for error in validation_result.errors():
-        print("-", error)
-
-
-
-base = "https://restful-booker.herokuapp.com"
 
 # Creates a token for PUT and DELETE requests
-def get_token(username, password, headers):
-    data = {
-        "username": username,
-        "password": password
-    }
+def get_token(data, headers):
     try:
         response = requests.post(f"{base}/auth", json=data, headers=headers, verify=False)
-        # response.content()
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
-    else:
-        print('Success!')
-        return response
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
 
 
 # GET
@@ -129,10 +121,23 @@ def delete_booking(id, headers):
 ## Token generation
 username = "admin"
 password = "password123"
+
+t_data = {
+    "username": username,
+    "password": password
+}
+
 headers = {'Content-Type': 'application/json'}
 
-token_q = get_token(username, password, headers)
-print(token_q.json())
+validation_result = validator.validate(t_data)
+if validation_result.is_valid():
+    print("Payload is valid!")
+    token_q = get_token(t_data, headers)
+    print(token_q.json())
+else:
+    print("Validation errors:")
+    for error in validation_result.errors():
+        print("-", error)
 
 
 ## GET
@@ -148,8 +153,15 @@ optional_params = {
     "checkout": checkout
 }
 
-get_q = get_booking(**optional_params)
-print(get_q.json())
+validation_result = validator.validate(optional_params)
+if validation_result.is_valid():
+    print("Payload is valid!")
+    get_q = get_booking(**optional_params)
+    print(get_q.json())
+else:
+    print("Validation errors:")
+    for error in validation_result.errors():
+        print("-", error)
 
 
 ## POST
@@ -170,8 +182,15 @@ booking_creation_data = {
 "additionalneeds" : "Breakfast"
 }
 
-post_q = create_booking(booking_creation_data, headers)
-print(post_q.json())
+validation_result = validator.validate(booking_creation_data)
+if validation_result.is_valid():
+    print("Payload is valid!")
+    post_q = create_booking(booking_creation_data, headers)
+    print(post_q.json())
+else:
+    print("Validation errors:")
+    for error in validation_result.errors():
+        print("-", error)
 
 
 ## PUT
@@ -194,8 +213,15 @@ booking_update_data = {
 "additionalneeds" : "Breakfast"
 }
 
-put_q = update_booking(id, booking_update_data, headers)
-print(put_q.json())
+validation_result = validator.validate(booking_update_data)
+if validation_result.is_valid():
+    print("Payload is valid!")
+    put_q = update_booking(id, booking_update_data, headers)
+    print(put_q.json())
+else:
+    print("Validation errors:")
+    for error in validation_result.errors():
+        print("-", error)
 
 
 ## PATCH
@@ -206,13 +232,20 @@ headers = {
     'Accept': 'application/json'
     }
 
-booking_update_data = {
+booking_patch_data = {
 "firstname" : "Jimothy",
 "lastname" : "Brown"
 }
 
-patch_q = patch_booking(id, booking_update_data, headers)
-print(patch_q.json())
+validation_result = validator.validate(booking_patch_data)
+if validation_result.is_valid():
+    print("Payload is valid!")
+    patch_q = patch_booking(id, booking_patch_data, headers)
+    print(patch_q.json())
+else:
+    print("Validation errors:")
+    for error in validation_result.errors():
+        print("-", error)
 
 
 ## DELETE
