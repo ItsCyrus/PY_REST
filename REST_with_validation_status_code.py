@@ -67,53 +67,58 @@ def get_token(data, headers):
 # GET
 def get_booking(**kwargs):
     params = {key: value for key, value in kwargs.items() if value is not None}
-    response = requests.get(f"{base}/booking", params=params)
-
-    if response.status_code == 200:
-        return response
-    else:
-        print("Request failed with status code:", response.status_code)
-        return None
+    try:
+        response = requests.get(f"{base}/booking", params=params)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
 
 # POST
 def create_booking(booking_creation_data, headers):
-    response = requests.post(f"{base}/booking", json=booking_creation_data, headers=headers)
-
-    if response.status_code == 200:
-        return response
-    else:
-        print("Request failed with status code:", response.status_code)
-        return None
+    try:
+        response = requests.post(f"{base}/booking", json=booking_creation_data, headers=headers)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
 
 # PUT
 def update_booking(id, booking_update_data, headers):
-    response = requests.put(f"{base}/booking/{id}", json=booking_update_data, headers=headers)
-
-    if response.status_code == 200:
-        return response
-    else:
-        print("Request failed with status code:", response.status_code)
-        return None
+    try:
+        response = requests.put(f"{base}/booking/{id}", json=booking_update_data, headers=headers)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
     
 # PATCH
 def patch_booking(id, booking_patch_data, headers):
-    response = requests.patch(f"{base}/booking/{id}", json=booking_patch_data, headers=headers)
-
-    if response.status_code == 200:
-        return response
-    else:
-        print("Request failed with status code:", response.status_code)
-        return None
+    try:
+        response = requests.put(f"{base}/booking/{id}", json=booking_patch_data, headers=headers)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
     
 # DELETE
 def delete_booking(id, headers):
-    response = requests.delete(f"{base}/booking/{id}", headers=headers)
-
-    if response.status_code == 200:
-        return response
-    else:
-        print("Request failed with status code:", response.status_code)
-        return None
+    try:
+        response = requests.delete(f"{base}/booking/{id}", headers=headers)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+    return handle_response(response)
 
 ###############################################
     
