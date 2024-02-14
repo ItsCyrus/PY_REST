@@ -15,7 +15,7 @@ class REST_Validator(PayloadValidator):
     firstname = datatypes.String(error='firstname must be a string', required=False)
     lastname = datatypes.String(error='lastname must be a string', required=False)
     totalprice = datatypes.Integer(error='totalprice must be an integer', required=False)
-    depositpaid = datatypes.Boolean(error='totalprice must be true or false', required=False)
+    depositpaid = datatypes.Boolean(error='depositpaid must be true or false', required=False)
 
     # bookingdates = datatypes.Function('validate_bookingdates', error='Release year must be in between 1800 and current year.', required=False)
 
@@ -32,8 +32,6 @@ class REST_Validator(PayloadValidator):
     #         return True
     #     except (ValueError, TypeError):
     #         return False
-
-# validator = REST_Validator()
 
 
 def handle_response(response):
@@ -64,12 +62,10 @@ def get_token(data, headers):
         print("Error:", e)
     return handle_response(response)
 
-
 # GET
-def get_booking(**kwargs):
-    params = {key: value for key, value in kwargs.items() if value is not None}
+def get_booking(id):
     try:
-        response = requests.get(f"{base}/booking", params=params)
+        response = requests.get(f"{base}/booking/{id}", verify=False)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -80,7 +76,7 @@ def get_booking(**kwargs):
 # POST
 def create_booking(booking_creation_data, headers):
     try:
-        response = requests.post(f"{base}/booking", json=booking_creation_data, headers=headers)
+        response = requests.post(f"{base}/booking", json=booking_creation_data, headers=headers, verify=False)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -91,7 +87,7 @@ def create_booking(booking_creation_data, headers):
 # PUT
 def update_booking(id, booking_update_data, headers):
     try:
-        response = requests.put(f"{base}/booking/{id}", json=booking_update_data, headers=headers)
+        response = requests.put(f"{base}/booking/{id}", json=booking_update_data, headers=headers, verify=False)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -102,7 +98,7 @@ def update_booking(id, booking_update_data, headers):
 # PATCH
 def patch_booking(id, booking_patch_data, headers):
     try:
-        response = requests.put(f"{base}/booking/{id}", json=booking_patch_data, headers=headers)
+        response = requests.patch(f"{base}/booking/{id}", json=booking_patch_data, headers=headers, verify=False)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -113,7 +109,7 @@ def patch_booking(id, booking_patch_data, headers):
 # DELETE
 def delete_booking(id, headers):
     try:
-        response = requests.delete(f"{base}/booking/{id}", headers=headers)
+        response = requests.delete(f"{base}/booking/{id}", headers=headers, verify=False)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -125,6 +121,8 @@ def delete_booking(id, headers):
     
 # TEST
 ## Token generation
+print()
+print("Token generation")
 username = "admin"
 password = "password123"
 
@@ -142,29 +140,23 @@ if errors is None:
     token_q = get_token(t_data, headers)
     print(token_q.json())
 
+token_val = 'token=' + json.loads(token_q.text)['token']
+print(token_val)
+
 
 ## GET
-firstname = None
-lastname = None
-checkin = None
-checkout = None
+print()
+print("GET")
+id = 2
 
-optional_params = {
-    "firstname": firstname,
-    "lastname": lastname,
-    "checkin": checkin,
-    "checkout": checkout
-}
-
-result, errors = REST_Validator().validate(optional_params)
-assert result and errors is None, 'Validation failed.\n%s' % json.dumps(errors, indent=2)
-if errors is None:
-    print("Payload is valid!")
-    get_q = get_booking(**optional_params)
-    print(get_q.json())
+get_q = get_booking(id)
+print(get_q.json())
 
 
 ## POST
+print()
+print("POST")
+
 headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -174,7 +166,7 @@ booking_creation_data = {
 "firstname" : "Jim",
 "lastname" : "Brown",
 "totalprice" : 111,
-"depositpaid" : "true",
+"depositpaid" : True,
 "bookingdates" : {
     "checkin" : "2018-01-01",
     "checkout" : "2019-01-01"
@@ -187,13 +179,16 @@ assert result and errors is None, 'Validation failed.\n%s' % json.dumps(errors, 
 if errors is None:
     print("Payload is valid!")
     post_q = create_booking(booking_creation_data, headers)
-    print(post_q.json())
+    print(post_q.json)
 
 
 ## PUT
-id = 1
+print()
+print("PUT")
+
+id = 2
 headers = {
-    'Cookie': token_q.text(),
+    'Cookie': token_val,
     'Content-Type': 'application/json',
     'Accept': 'application/json'
     }
@@ -202,12 +197,12 @@ booking_update_data = {
 "firstname" : "Kat",
 "lastname" : "Brown",
 "totalprice" : 111,
-"depositpaid" : "true",
+"depositpaid" : True,
 "bookingdates" : {
     "checkin" : "2018-01-01",
     "checkout" : "2019-01-01"
 },
-"additionalneeds" : "Breakfast"
+"additionalneeds" : "Lunch"
 }
 
 result, errors = REST_Validator().validate(booking_update_data)
@@ -219,9 +214,12 @@ if errors is None:
 
 
 ## PATCH
-id = 1
+print()
+print("PATCH")
+
+id = 2
 headers = {
-    'Cookie': token_q.text(),
+    'Cookie': token_val,
     'Content-Type': 'application/json',
     'Accept': 'application/json'
     }
@@ -240,11 +238,13 @@ if errors is None:
 
 
 ## DELETE
+print()
+print("DELETE")    
+
 id = 1
 headers = {
-    'Cookie': token_q.text(),
+    'Cookie': token_val,
     'Content-Type': 'application/json'
     }
 
 delete_q = delete_booking(id, headers)
-print(delete_q.json())
