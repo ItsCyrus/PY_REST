@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify, Blueprint, render_template
 import json
 from model import Item
+from blueprints.home import home_bp
 
 app = Flask(__name__)
+
+app.register_blueprint(home_bp)
 
 db = 'Flask_App/data/db.json'
 
@@ -43,9 +46,9 @@ def create_item():
     save_data([item.serialize() for item in items])
     return jsonify(new_item.serialize()), 201
 
-@app.route("/")
-def homepage():
-    return "THE HOMEPAGE"
+# @app.route("/")
+# def homepage():
+#     return "THE HOMEPAGE"
 
 if __name__ == '__main__':
     app.run(debug=True)

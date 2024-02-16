@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from model import Item
 import json
 
-home_bp = Blueprint('home', __name__)
+home_bp = Blueprint('home', __name__,template_folder='templates')
 
 @home_bp.route('/')
 def index():
