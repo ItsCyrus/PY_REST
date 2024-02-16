@@ -1,0 +1,38 @@
+
+[
+    {
+        "model": "16-inch MacBook Pro",
+        "specs": "M3 Pro SoC, 18GB Unified Memory, 512GB SSD",
+        "color": "Space Black",
+        "availability": true,
+        "image": "Flask_App/data/Images/16-inch Space Black.jpeg"
+    },
+    {
+        "model": "16-inch MacBook Pro",
+        "specs": "M3 Pro SoC, 18GB Unified Memory, 512GB SSD",
+        "color": "Silver",
+        "availability": true,
+        "image": "Flask_App/data/Images/16-inch Silver.jpeg"
+    },
+    {
+        "model": "14-inch MacBook Pro",
+        "specs": "M3 Pro SoC, 18GB Unified Memory, 512GB SSD",
+        "color": "Space Grey",
+        "availability": true,
+        "image": "Flask_App/data/Images/14-inch Space Grey.jpeg"
+    },
+    {
+        "model": "14-inch MacBook Pro",
+        "specs": "M3 Pro SoC, 18GB Unified Memory, 512GB SSD",
+        "color": "Silver",
+        "availability": true,
+        "image": "Flask_App/data/Images/14-inch Silver.jpeg"
+    },
+    {
+        "model": "14-inch MacBook Pro",
+        "specs": "M1 Pro SoC, 16GB Unified Memory, 512GB SSD",
+        "color": "Space Grey",
+        "availability": false,
+        "image": "Flask_App/data/Images/14-inch Space Grey.jpeg"
+    }
+]
